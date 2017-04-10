@@ -29,3 +29,4 @@
 		{l s='Pay by Paystack' d='Modules.Paystack.Shop'}&nbsp;<span>{l s='(order processing will be longer)' d='Modules.Paystack.Shop'}</span>
 	</a>
 </p>
+

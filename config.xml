@@ -3,8 +3,8 @@
     <name>paystack</name>
     <displayName><![CDATA[Paystack]]></displayName>
     <version><![CDATA[1.0.0]]></version>
-    <description><![CDATA[Accept payments for your products via Paystack transfer.]]></description>
-    <author><![CDATA[WCST]]></author>
+    <description><![CDATA[Accept payments for your products via Paystack. Compatible with Prestashop 1.7 and higher]]></description>
+    <author><![CDATA[Douglas Kendyson]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
 	<confirmUninstall><![CDATA[Are you sure about removing these details?]]></confirmUninstall>
     <is_configurable>1</is_configurable>

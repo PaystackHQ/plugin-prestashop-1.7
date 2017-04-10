@@ -31,6 +31,9 @@
       {l s='We\'ve also sent you this information by e-mail.' mod='paystack'}
     </p>
     <p>
+    Paystack Order Reference: <b>{$reference}</b>
+    </p>
+    <p>
       {l s='If you have questions, comments or concerns, please contact our [1]expert customer support team[/1].' mod='paystack' tags=["<a href='{$contact_url}'>"]}
     </p>
 {else}

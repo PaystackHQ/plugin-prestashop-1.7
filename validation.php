@@ -61,7 +61,7 @@ if (!Validate::isLoadedObject($customer)) {
 $currency = $context->currency;
 $total = (float)($cart->getOrderTotal(true, Cart::BOTH));
 
-$paystack->validateOrder($cart->id, Configuration::get('PS_OS_EFTSECURE'), $total, $paystack->displayName, null, array(), (int)$currency->id, false, $customer->secure_key);
+$paystack->validateOrder($cart->id, Configuration::get('PS_OS_PAYSTACK'), $total, $paystack->displayName, null, array(), (int)$currency->id, false, $customer->secure_key);
 
 $order = new Order($paystack->currentOrder);
 Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$paystack->id.'&id_order='.$paystack->currentOrder.'&key='.$customer->secure_key);

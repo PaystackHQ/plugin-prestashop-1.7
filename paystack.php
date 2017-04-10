@@ -53,17 +53,8 @@ class Paystack extends PaymentModule
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
 
-        $config = Configuration::getMultiple(array('PAYSTACK_TEST_SECRETKEY','PAYSTACK_TEST_PUBLICKEY','PAYSTACK_LIVE_SECRETKEY','PAYSTACK_LIVE_PUBLICKEY','PAYSTACK_MODE','PAYSTACK_STYLE'));
-        // if (!empty($config['PAYSTACK_USERNAME'])) {
-        //     $this->owner = $config['PAYSTACK_USERNAME'];
-        // }
-        // if (!empty($config['PAYSTACK_DETAILS'])) {
-        //     $this->details = $config['PAYSTACK_DETAILS'];
-        // }
-        // if (!empty($config['PAYSTACK_PASSWORD'])) {
-        //     $this->address = $config['PAYSTACK_PASSWORD'];
-        // }
-
+        $config = Configuration::getMultiple(array('PAYSTACK_TEST_SECRETKEY','PAYSTACK_TEST_PUBLICKEY','PAYSTACK_LIVE_SECRETKEY','PAYSTACK_LIVE_PUBLICKEY','PAYSTACK_MODE'));
+     
         $this->bootstrap = true;
         parent::__construct();
 
@@ -97,13 +88,13 @@ class Paystack extends PaymentModule
         $newState->send_email = true;
         $newState->module_name = $this->name;
         $newState->invoice = false;
-        $newState->color = "#002F95";
+        $newState->color = "#04b404";
         $newState->unremovable = false;
-        $newState->logable = false;
+        $newState->logable = true;
         $newState->delivery = false;
         $newState->hidden = false;
         $newState->shipped = false;
-        $newState->paid = false;
+        $newState->paid = true;
         $newState->delete = false;
 
         $languages = Language::getLanguages(true);
@@ -111,13 +102,13 @@ class Paystack extends PaymentModule
             if ($lang['iso_code'] == 'id') {
                 $newState->name[(int)$lang['id_lang']] = 'Menunggu pembayaran via Paystack';
             } else {
-                $newState->name[(int)$lang['id_lang']] = 'Awaiting Paystack Payment';
+                $newState->name[(int)$lang['id_lang']] = 'Payment successful';
             }
             $newState->template = "paystack";
         }
 
         if ($newState->add()) {
-            Configuration::updateValue('PS_OS_EFTSECURE', $newState->id);
+            Configuration::updateValue('PS_OS_PAYSTACK', $newState->id);
             copy(dirname(__FILE__).'/logo.png', _PS_IMG_DIR_.'tmp/order_state_mini_'.(int)$newState->id.'_1.png');
         } else {
             return false;
@@ -139,24 +130,6 @@ class Paystack extends PaymentModule
         return true;
     }
 
-   //  protected function _postValidation()
-   //  {
-   //      if (Tools::isSubmit('btnSubmit')) {
-   //          if (!Tools::getValue('PAYSTACK_USERNAME')) {
-   //              $this->_postErrors[] = $this->trans('API username is required.', array(), 'Modules.Paystack.Admin');
-   //          } elseif (!Tools::getValue('PAYSTACK_PASSWORD')) {
-   //              $this->_postErrors[] = $this->trans('API password is required.', array(), "Modules.Paystack.Admin");
-   //          } else {
-			// 	$paystack_username = Tools::getValue('PAYSTACK_USERNAME');
-			// 	$paystack_password = Tools::getValue('PAYSTACK_PASSWORD');
-			// 	$response_data = $this->chkAuthorization($paystack_username, $paystack_password);
-			// 	if(!isset($response_data->token)){
-			// 		$this->_postErrors[] = $this->trans($response_data->message, array(), "Modules.Paystack.Admin");
-			// 	}
-			// }
-   //      }
-   //  }
-
     protected function _postProcess()
     {
         if (Tools::isSubmit('btnSubmit')) {
@@ -165,7 +138,6 @@ class Paystack extends PaymentModule
             Configuration::updateValue('PAYSTACK_LIVE_SECRETKEY', Tools::getValue('PAYSTACK_LIVE_SECRETKEY'));
             Configuration::updateValue('PAYSTACK_LIVE_PUBLICKEY', Tools::getValue('PAYSTACK_LIVE_PUBLICKEY'));
             Configuration::updateValue('PAYSTACK_MODE', Tools::getValue('PAYSTACK_MODE'));
-            Configuration::updateValue('PAYSTACK_STYLE', Tools::getValue('PAYSTACK_STYLE'));
         }
         $this->_html .= $this->displayConfirmation($this->trans('Settings updated', array(), 'Admin.Global'));
     }
@@ -175,28 +147,8 @@ class Paystack extends PaymentModule
         return $this->display(__FILE__, 'infos.tpl');
     }
 	
-	public function chkAuthorization($paystack_username, $paystack_password)
-    {
-		$curl = curl_init('https://services.callpay.com/api/v1/token');
-		curl_setopt($curl, CURLOPT_HEADER, 0);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_POST, 1);
-		curl_setopt($curl, CURLOPT_USERPWD, $paystack_username . ":" . $paystack_password);
-
-		$response = curl_exec($curl);
-		curl_close($curl);
-		$response_data = json_decode($response);
-		return $response_data;
-	}
 	
-	public function hookHeader($params)
-    {
-        if ((int)Tools::getValue('eft_iframe') == 1) {
-            $this->addJsRC(__PS_BASE_URI__.'modules/paystack/views/js/jquery.blockUI.min.js');
-			$this->addJsRC(__PS_BASE_URI__.'modules/paystack/views/js/paystack_checkout.js');
-        }
-    }
+	
 	
 	public function addJsRC($js_uri)
     {
@@ -206,7 +158,6 @@ class Paystack extends PaymentModule
     public function getContent()
     {
         if (Tools::isSubmit('btnSubmit')) {
-            // $this->_postValidation();
             if (!count($this->_postErrors)) {
                 $this->_postProcess();
             } else {
@@ -226,9 +177,9 @@ class Paystack extends PaymentModule
 
     public function hookPaymentOptions($params)
     {
-		$paystack_username = Configuration::get('PAYSTACK_USERNAME');
-		$paystack_password = Configuration::get('PAYSTACK_PASSWORD');
-        if (!$this->active) {
+        
+        
+		if (!$this->active) {
             return;
         }
 
@@ -236,54 +187,50 @@ class Paystack extends PaymentModule
             return;
         }
 		
-		if (!$this->checkCurrencyzar($params['cart'])) {
+		if (!$this->checkCurrencyNGN($params['cart'])) {
             return;
         }
-		
-		if($paystack_username == '' AND $paystack_password == ''){
+		$config = $this->getConfigFieldsValues();
+        if ($config['PAYSTACK_MODE'] == 1) {
+           $key = $config['PAYSTACK_TEST_PUBLICKEY'];
+        }
+
+		if($key == ''){
 			return;
 		}
-		
-		$eft_iframe = 0;
-        if ((int)Tools::getValue('eft_iframe') == 1) {
-            $eft_iframe = 1;
-			$response_data = $this->chkAuthorization($paystack_username, $paystack_password);
+        $gateway_chosen = 'none';
+        if (Tools::getValue('gateway') == 'paystack') {
+            $cart = $this->context->cart;
+            $gateway_chosen = 'paystack';
+			$customer = new Customer((int)($cart->id_customer));
 			
-			if(isset($response_data->token)){
-				$token = $response_data->token;
-				$organisation_id = $response_data->organisation_id;
-			} else {
-				$token = '';
-				$organisation_id = '';
-			}
-			
-			$cart = $this->context->cart;
 			$amount = $cart->getOrderTotal(true, Cart::BOTH);
 			
 			$params = array(
-				"reference" 		=> 'order_'.$params['cart']->id,
-				"organisation_id" 	=> $organisation_id,
-				"token" 			=> $token,
+				"reference" 		=> 'order_'.$params['cart']->id.'_'.time(),
 				"amount" 			=> number_format($amount, 2),
 				"pcolor" 			=> '',
 				"scolor" 			=> '',
-			);
-			
-            $this->context->smarty->assign(array(
-                'eft_iframe' => 1,
-                'params'	 => $params,
-                'form_url' 		=> $this->context->link->getModuleLink($this->name, 'eftsuccess', array(), true),
+                "total_amount"        => $amount*100,
+                "key"        => $key,
+                "email" => $customer->email,
+ 			);
+			$this->context->smarty->assign(array(
+                'gateway_chosen' => 'paystack',
+                'form_url' 		=> $this->context->link->getModuleLink($this->name, 'paystacksuccess', array(), true),
             ));
+            $this->context->smarty->assign(
+               $params
+            );
+
         }
-
-        $this->context->smarty->assign(
-            $this->getTemplateVarInfos()
-        );
-
+            
+       
         $newOption = new PaymentOption();
-        $newOption->setCallToActionText($this->trans('Pay by Paystack', array(), 'Modules.Paystack.Shop'))
+        $newOption->setCallToActionText($this->trans('Paystack (Debit/credit cards)', array(), 'Modules.Paystack.Shop'))
                       ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true))
                       ->setAdditionalInformation($this->context->smarty->fetch('module:paystack/views/templates/hook/intro.tpl'))
+                       ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/card-logos.png'))
 					  ->setInputs(array(
 						'wcst_iframe' => array(
 							'name' =>'wcst_iframe',
@@ -291,7 +238,7 @@ class Paystack extends PaymentModule
 							'value' =>'1',
 						)
 					));
-		if ($eft_iframe == 1) {
+		if ($gateway_chosen == 'paystack') {
             $newOption->setAdditionalInformation(
                 $this->context->smarty->fetch('module:paystack/views/templates/front/embedded.tpl')
             );
@@ -311,29 +258,20 @@ class Paystack extends PaymentModule
         }
 
         $state = $params['order']->getCurrentState();
+        $reference = Tools::getValue('reference');
+        if ($reference == "" || $reference == NULL) {
+            $reference = $params['order']->reference;
+        }
         if (in_array(
             $state,
             array(
-                Configuration::get('PS_OS_EFTSECURE'),
+                Configuration::get('PS_OS_PAYSTACK'),
                 Configuration::get('PS_OS_OUTOFSTOCK'),
                 Configuration::get('PS_OS_OUTOFSTOCK_UNPAID'),
             )
         )) {
             $paystackOwner = $this->owner;
-            if (!$paystackOwner) {
-                $paystackOwner = '___________';
-            }
-
-            $paystackDetails = Tools::nl2br($this->details);
-            if (!$paystackDetails) {
-                $paystackDetails = '___________';
-            }
-
-            $paystackAddress = Tools::nl2br($this->address);
-            if (!$paystackAddress) {
-                $paystackAddress = '___________';
-            }
-
+           
             $this->smarty->assign(array(
                 'shop_name' => $this->context->shop->name,
                 'total' => Tools::displayPrice(
@@ -345,7 +283,7 @@ class Paystack extends PaymentModule
                 'paystackAddress' => $paystackAddress,
                 'paystackOwner' => $paystackOwner,
                 'status' => 'ok',
-                'reference' => $params['order']->reference,
+                'reference' => $reference,
                 'contact_url' => $this->context->link->getPageLink('contact', true)
             ));
         } else {
@@ -375,7 +313,7 @@ class Paystack extends PaymentModule
         return false;
     }
 	
-	public function checkCurrencyzar($cart)
+	public function checkCurrencyNGN($cart)
     {
         $currency_order = new Currency($cart->id_currency);
         if ($currency_order->iso_code == 'NGN') {
@@ -433,25 +371,7 @@ class Paystack extends PaymentModule
                         'type' => 'text',
                         'label' => $this->trans('Live Public key', array(), 'Modules.Paystack.Admin'),
                         'name' => 'PAYSTACK_LIVE_PUBLICKEY',
-                    ),    
-                    array(
-                        'type' => 'switch',
-                        'label' => $this->trans('Lazy Inline style', array(), 'Modules.Paystack.Admin'),
-                        'name' => 'PAYSTACK_STYLE',
-                        'is_bool' => true,
-                        'required' => true,
-                         'values' =>array(
-                            array(
-                                'id' => 'active_on',
-                                'value' => true,
-                                'label' => $this->trans('Lazy Inline', array(), 'Modules.Paystack.Admin')
-                            ),array(
-                                'id' => 'active_off',
-                                'value' => false,
-                                'label' => $this->trans('Inline', array(), 'Modules.Paystack.Admin')
-                            )
-                        ),
-                    ),   
+                    ),  
                 ),
                 'submit' => array(
                     'title' => $this->trans('Save', array(), 'Admin.Actions'),
@@ -490,33 +410,6 @@ class Paystack extends PaymentModule
             'PAYSTACK_LIVE_SECRETKEY' => Tools::getValue('PAYSTACK_LIVE_SECRETKEY', Configuration::get('PAYSTACK_LIVE_SECRETKEY')),
             'PAYSTACK_LIVE_PUBLICKEY' => Tools::getValue('PAYSTACK_LIVE_PUBLICKEY', Configuration::get('PAYSTACK_LIVE_PUBLICKEY')),
             'PAYSTACK_MODE' => Tools::getValue('PAYSTACK_MODE', Configuration::get('PAYSTACK_MODE')),
-            'PAYSTACK_STYLE' => Tools::getValue('PAYSTACK_STYLE', Configuration::get('PAYSTACK_STYLE')),
-        );
-    }
-
-    public function getTemplateVarInfos()
-    {
-        $cart = $this->context->cart;
-        $total = sprintf(
-            $this->trans('%1$s (tax incl.)', array(), 'Modules.Paystack.Shop'),
-            Tools::displayPrice($cart->getOrderTotal(true, Cart::BOTH))
-        );
-
-         $paystackOwner = $this->owner;
-        if (!$paystackOwner) {
-            $paystackOwner = '___________';
-        }
-
-        $paystackDetails = Tools::nl2br($this->details);
-        if (!$paystackDetails) {
-            $paystackDetails = '___________';
-        }
-
-        return array(
-            'total' => $total,
-            'paystackDetails' => $paystackDetails,
-            'paystackAddress' => $paystackAddress,
-            'paystackOwner' => $paystackOwner,
         );
     }
 }

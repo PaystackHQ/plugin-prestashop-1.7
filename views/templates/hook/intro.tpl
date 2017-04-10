@@ -23,8 +23,13 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-<section>
-  <p>
-	{$paystackDetails}
-  </p>
-</section>
+<style type="text/css">
+	.payment-option {
+	    margin-bottom: 1.5em !important;
+	    width: 105%;
+	}
+	.payment-option img {
+	    height: 50px;
+	    margin-top: -5px;
+	}
+</style>
