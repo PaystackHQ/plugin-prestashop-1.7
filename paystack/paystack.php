@@ -87,7 +87,7 @@ class Paystack extends PaymentModule
         
         $newState->send_email = true;
         $newState->module_name = $this->name;
-        $newState->invoice = false;
+        $newState->invoice = true;
         $newState->color = "#04b404";
         $newState->unremovable = false;
         $newState->logable = true;
