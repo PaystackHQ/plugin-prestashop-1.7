@@ -44,7 +44,7 @@ class Paystack extends PaymentModule
     {
         $this->name = 'paystack';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '1.0.2';
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Douglas Kendyson';
         $this->controllers = array('payment', 'validation');
@@ -193,6 +193,9 @@ class Paystack extends PaymentModule
 		$config = $this->getConfigFieldsValues();
         if ($config['PAYSTACK_MODE'] == 1) {
            $key = $config['PAYSTACK_TEST_PUBLICKEY'];
+        }else{
+           $key = $config['PAYSTACK_LIVE_PUBLICKEY'];
+
         }
 
 		if($key == ''){
