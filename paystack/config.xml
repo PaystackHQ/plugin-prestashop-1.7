@@ -2,7 +2,7 @@
 <module>
     <name>paystack</name>
     <displayName><![CDATA[Paystack]]></displayName>
-    <version><![CDATA[1.0.2]]></version>
+    <version><![CDATA[1.1.0]]></version>
     <description><![CDATA[Accept payments for your products via Paystack. Compatible with Prestashop 1.7 and higher]]></description>
     <author><![CDATA[Paystack]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
