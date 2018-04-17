@@ -11,11 +11,12 @@
 </form>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="text/javascript">
-	var handler = PaystackPop.setup({
+  var handler = PaystackPop.setup({
     key: '{$key}',
     email: '{$email}',
     amount: '{$total_amount}',
     ref: '{$reference}',
+    currency: '{$currency}',
     callback: function(response){
         $( "#paystack_form" ).submit();
     },

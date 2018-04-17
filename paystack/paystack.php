@@ -49,6 +49,7 @@ class Paystack extends PaymentModule
         $this->author = 'Paystack';
         $this->controllers = array('payment', 'validation');
         $this->is_eu_compatible = 0;
+        $this->module_key = '7bd648045911885fe8a9a3c6f550d76e';
 
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
@@ -202,6 +203,7 @@ class Paystack extends PaymentModule
             $gateway_chosen = 'paystack';
             $customer = new Customer((int)($cart->id_customer));
             $amount = $cart->getOrderTotal(true, Cart::BOTH);
+            $currency_order = new Currency($cart->id_currency);
             $params = array(
               "reference"   => 'order_'.$params['cart']->id.'_'.time(),
               "amount"      => number_format($amount, 2),
@@ -209,6 +211,7 @@ class Paystack extends PaymentModule
               "scolor"      => '',
               "total_amount"=> $amount*100,
               "key"         => $key,
+              "currency"    => $currency_order->iso_code,
               "email"       => $customer->email,
             );
             $this->context->smarty->assign(
@@ -316,7 +319,7 @@ class Paystack extends PaymentModule
     public function checkCurrencyNGN($cart)
     {
         $currency_order = new Currency($cart->id_currency);
-        if ($currency_order->iso_code == 'NGN') {
+        if ($currency_order->iso_code == 'NGN' || $currency_order->iso_code == 'GHS') {
             return true;
         }
         return false;
@@ -350,7 +353,7 @@ class Paystack extends PaymentModule
                             )
                         ),
                     ),
-					array(
+                    array(
                         'type' => 'text',
                         'label' => $this->trans('Test Secret key', array(), 'Modules.Paystack.Admin'),
                         'name' => 'PAYSTACK_TEST_SECRETKEY',
