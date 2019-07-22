@@ -28,7 +28,7 @@
  * @since 1.5.0
  */
 
- include_once dirname(__DIR__) . "class-paystack-plugin-tracker.php";
+ include_once dirname(__FILE__) . "/class-paystack-plugin-tracker.php";
 class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
 {
     /**
