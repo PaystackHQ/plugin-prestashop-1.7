@@ -27,6 +27,8 @@
 /**
  * @since 1.5.0
  */
+
+ include_once dirname(__DIR__) . "class-paystack-plugin-tracker.php";
 class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
 {
     /**
@@ -75,6 +77,23 @@ class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
           $status = 'failed';
           	Tools::redirect('404');
         } else {
+
+          //PSTK - Logger
+          $mode = Configuration::get('PAYSTACK_MODE');
+          $test_pk = Configuration::get('PAYSTACK_TEST_PUBLICKEY');
+          $live_pk = Configuration::get('PAYSTACK_LIVE_PUBLICKEY');
+          if ($mode == '1') {
+            $key = $test_pk;
+          }else{
+            $key = $live_pk;
+          }
+          $key = str_replace(' ', '', $key);
+          $pstk_logger = new presta_1_7_paystack_plugin_tracker('presta-1.7', $key );
+          $pstk_logger->log_transaction_success($txn_code);
+          // PSTK Logger done -----------------
+
+
+
          $email = $verification->data->customer->email;
           $date = $verification->data->transaction_date;
           $total = $verification->data->amount/100;

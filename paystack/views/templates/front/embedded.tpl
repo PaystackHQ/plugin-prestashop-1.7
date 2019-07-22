@@ -17,6 +17,15 @@
     amount: '{$total_amount}',
     ref: '{$reference}',
     currency: '{$currency}',
+    metadata:{
+       "custom_fields":[
+    {
+      "display_name":"Plugin",
+      "variable_name":"plugin",
+      "value":'presta-1.7'
+    }
+  ]
+    }
     callback: function(response){
         $( "#paystack_form" ).submit();
     },
