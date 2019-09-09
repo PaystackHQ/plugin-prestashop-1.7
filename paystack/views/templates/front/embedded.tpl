@@ -25,7 +25,7 @@
       "value":'presta-1.7'
     }
   ]
-    }
+    },
     callback: function(response){
         $( "#paystack_form" ).submit();
     },
