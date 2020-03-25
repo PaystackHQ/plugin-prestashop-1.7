@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    env_file: local.env
+  
+  prestashop:
+    depends_on:
+      - mysql
+    build: .
+    image: paystack-prestashop-image
+    ports:
+      - "8000:80"
+    env_file: local.env
+    volumes:
+      - data-volume:/var/www/html
+volumes:
+  db_data: {}
+  data-volume:
