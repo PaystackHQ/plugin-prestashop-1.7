@@ -374,7 +374,12 @@ class Paystack extends PaymentModule
                         'type' => 'text',
                         'label' => $this->trans('Live Public key', array(), 'Modules.Paystack.Admin'),
                         'name' => 'PAYSTACK_LIVE_PUBLICKEY',
-                    ),  
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->trans('Do you have corona?', array(), 'Modules.Paystack.Admin'),
+                        'name' => 'CORONASTATUS',
+                    ),   
                 ),
                 'submit' => array(
                     'title' => $this->trans('Save', array(), 'Admin.Actions'),
