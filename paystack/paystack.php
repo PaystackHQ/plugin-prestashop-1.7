@@ -318,7 +318,7 @@ class Paystack extends PaymentModule
     public function checkCurrencyNGN($cart)
     {
         $currency_order = new Currency($cart->id_currency);
-        if ($currency_order->iso_code == 'NGN' || $currency_order->iso_code == 'GHS' || $currency_order->iso_code == 'ZAR' || $currency_order->iso_code == 'USD') {
+        if ($currency_order->iso_code == 'NGN' || $currency_order->iso_code == 'GHS' || $currency_order->iso_code == 'ZAR' || $currency_order->iso_code == 'USD' || $currency_order->iso_code == 'XOF' || $currency_order->iso_code == 'KES' || $currency_order->iso_code == 'EGP') {
             return true;
         }
         return false;
