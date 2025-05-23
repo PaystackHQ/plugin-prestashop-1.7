@@ -27,8 +27,6 @@
 /**
  * @since 1.5.0
  */
-
- include_once dirname(__FILE__) . "/class-paystack-plugin-tracker.php";
 class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
 {
     /**
@@ -55,12 +53,31 @@ class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
 
       $context = stream_context_create($contextOptions);
       $url = 'https://api.paystack.co/transaction/verify/'.$code;
-      $request = Tools::file_get_contents($url, false, $context);
-      $result = Tools::jsonDecode($request);
-      return $result;
+
+      /**
+       * Tools::file_get_contents() and Tools::jsonDecode() are deprecated in 1.7.6
+       *  $request = Tools::file_get_contents($url, false, $context);
+       *  $result = Tools::jsonDecode($request);
+       *  switch to cURL for better performance
+       *  and error handling
+       */
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer ' . $key,
+            'Cache-Control: no-cache',
+        ));
+      $response = curl_exec($ch);
+      $err = curl_error($ch);
+      curl_close($ch);
+      PrestaShopLogger::addLog('[Paystack cURL Error] ' . $err, 3);
+      return json_decode($response);
     }
     public function initContent()
     {
+        
 		$cart = $this->context->cart;
     	$txn_code = Tools::getValue('reference');
         if(Tools::getValue('reference') == ""){
@@ -69,7 +86,7 @@ class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
         $amount = Tools::getValue('amount');
         $email = Tools::getValue('email');
         $verification = $this->verify_txn($txn_code);
-       
+        
         if(($verification->status===false) || (!property_exists($verification, 'data')) || ($verification->data->status !== 'success')){
           $date = date("Y-m-d h:i:sa");
           $email = $email;
@@ -77,23 +94,6 @@ class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
           $status = 'failed';
           	Tools::redirect('404');
         } else {
-
-          //PSTK - Logger
-          $mode = Configuration::get('PAYSTACK_MODE');
-          $test_pk = Configuration::get('PAYSTACK_TEST_PUBLICKEY');
-          $live_pk = Configuration::get('PAYSTACK_LIVE_PUBLICKEY');
-          if ($mode == '1') {
-            $key = $test_pk;
-          }else{
-            $key = $live_pk;
-          }
-          $key = str_replace(' ', '', $key);
-          $pstk_logger = new presta_1_7_paystack_plugin_tracker('presta-1.7', $key );
-          $pstk_logger->log_transaction_success($txn_code);
-          // PSTK Logger done -----------------
-
-
-
          $email = $verification->data->customer->email;
           $date = $verification->data->transaction_date;
           $total = $verification->data->amount/100;
