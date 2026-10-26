@@ -40,12 +40,13 @@ class PaystackValidationModuleFrontController extends ModuleFrontController
 
         // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
         $authorized = false;
-        foreach (Module::getPaymentModules() as $module)
+        foreach (Module::getPaymentModules() as $module) {
             if ($module['name'] == 'paystack')
             {
                 $authorized = true;
                 break;
             }
+        }
         if (!$authorized)
             die($this->module->getTranslator()->trans('This payment method is not available.', array(), 'Modules.Paystack.Shop'));
 		

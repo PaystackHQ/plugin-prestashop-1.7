@@ -45,7 +45,10 @@ class PaystackPaymentModuleFrontController extends ModuleFrontController
 
         $total = sprintf(
             $this->getTranslator()->trans('%1$s (tax incl.)', array(), 'Modules.Paystack.Shop'),
-            Tools::displayPrice($cart->getOrderTotal(true, Cart::BOTH))
+            $this->context->getCurrentLocale()->formatPrice(
+                $cart->getOrderTotal(true, Cart::BOTH),
+                (new Currency($cart->id_currency))->iso_code
+            )
         );
 
         $this->context->smarty->assign(array(
