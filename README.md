@@ -2,6 +2,12 @@
 
 The Paystack Gateway for Prestashop is a module that allows customers to make payments via their card or bank details using Paystack on [Prestashop](https://www.prestashop.com/)
 
+## Requirements
+
+- PHP with the 21 Oct 2026 security fixes for critical remote code execution flaws (GHSA-w8hw-w9fx-j79w, GHSA-6wmf-4rv5-p3rp; [php.net advisory](https://www.php.net/releases/8_2_35.php)): **8.2.35, 8.3.36, 8.4.27, 8.5.12 or later**. PHP 8.1 and older no longer receive security fixes.
+- PrestaShop 1.7 (PHP 7.4 at most) and PrestaShop 8.x (PHP 8.1 at most) cannot run a PHP version that has these fixes. PrestaShop 9.0 supports PHP 8.1 to 8.4 and PrestaShop 9.1 supports PHP 8.1 to 8.5, so use PrestaShop 9 with one of the patched PHP versions above. See the official system requirements for [PrestaShop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/), [PrestaShop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/) and [PrestaShop 1.7](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/).
+- Despite the repository name, this module was tested on PrestaShop 9.1.5 with PHP 8.3.36 (install, payment option on the checkout page, and the payment verification and order confirmation flow against a local stub of the Paystack API). It was not re-tested on PrestaShop 1.7 or 8.x.
+
 ## Installation
 
 1. Download the zip folder for this repository to get the PrestaShop module. Unzip the zip file and zip the folder titled `paystack`. Ignore the `screenshots` and `README.md` file.

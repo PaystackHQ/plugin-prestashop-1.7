@@ -56,21 +56,18 @@ class PaystackPaystacksuccessModuleFrontController extends ModuleFrontController
       $context = stream_context_create($contextOptions);
       $url = 'https://api.paystack.co/transaction/verify/'.$code;
       $request = Tools::file_get_contents($url, false, $context);
-      $result = Tools::jsonDecode($request);
+      $result = json_decode($request);
       return $result;
     }
     public function initContent()
     {
 		$cart = $this->context->cart;
     	$txn_code = Tools::getValue('reference');
-        if(Tools::getValue('reference') == ""){
-          $txn_code = $_POST['reference'];
-        }
         $amount = Tools::getValue('amount');
         $email = Tools::getValue('email');
         $verification = $this->verify_txn($txn_code);
        
-        if(($verification->status===false) || (!property_exists($verification, 'data')) || ($verification->data->status !== 'success')){
+        if(!is_object($verification) || ($verification->status===false) || (!property_exists($verification, 'data')) || ($verification->data->status !== 'success')){
           $date = date("Y-m-d h:i:sa");
           $email = $email;
           $total = $amount;

@@ -1,4 +1,4 @@
-FROM prestashop/prestashop:1.7-7.2-apache
+FROM prestashop/prestashop:9.1.5-5.0-classic-8.3-apache
 
 WORKDIR /var/www/html/
 

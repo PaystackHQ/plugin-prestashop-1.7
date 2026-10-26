@@ -39,6 +39,8 @@ class Paystack extends PaymentModule
     public $owner;
     public $address;
     public $extra_mail_vars;
+    public $is_eu_compatible;
+    public $fields_form;
 
     public function __construct()
     {
@@ -79,7 +81,7 @@ class Paystack extends PaymentModule
 
     public function install()
     {
-        if (!parent::install() || !$this->registerHook('paymentReturn') || !$this->registerHook('paymentOptions') || !$this->registerHook('header')) {
+        if (!parent::install() || !$this->registerHook('displayPaymentReturn') || !$this->registerHook('paymentOptions') || !$this->registerHook('displayHeader')) {
             return false;
         }
 
@@ -96,7 +98,6 @@ class Paystack extends PaymentModule
         $newState->hidden = false;
         $newState->shipped = false;
         $newState->paid = true;
-        $newState->delete = false;
 
         $languages = Language::getLanguages(true);
         foreach ($languages as $lang) {
@@ -212,6 +213,7 @@ class Paystack extends PaymentModule
                 "total_amount" => $amount * 100,
                 "key"         => $key,
                 "currency"    => $currency_order->iso_code,
+                "currencies"  => $this->getCurrency((int)$cart->id_currency),
                 "email"       => $customer->email,
             );
             $this->context->smarty->assign(
@@ -251,6 +253,11 @@ class Paystack extends PaymentModule
         return $payment_options;
     }
 
+    public function hookDisplayPaymentReturn($params)
+    {
+        return $this->hookPaymentReturn($params);
+    }
+
     public function hookPaymentReturn($params)
     {
         if (!$this->active) {
@@ -275,13 +282,10 @@ class Paystack extends PaymentModule
             $this->smarty->assign(
                 array(
                     'shop_name' => $this->context->shop->name,
-                    'total' => Tools::displayPrice(
+                    'total' => $this->context->getCurrentLocale()->formatPrice(
                         $params['order']->getOrdersTotalPaid(),
-                        new Currency($params['order']->id_currency),
-                        false
+                        (new Currency($params['order']->id_currency))->iso_code
                     ),
-                    'paystackDetails' => $paystackDetails,
-                    'paystackAddress' => $paystackAddress,
                     'paystackOwner' => $paystackOwner,
                     'status' => 'ok',
                     'reference' => $reference,
